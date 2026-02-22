@@ -27,9 +27,11 @@ function LoginPage() {
       login({ token: res.data.token, user: { name: res.data.name, role: res.data.role } });
       navigate('/dashboard', { replace: true });
     } catch (err) {
+      const status = err?.response?.status;
+      const data = err?.response?.data;
       const msg =
-        err?.response?.data?.error ||
-        (err?.response?.status ? `Error ${err.response.status}` : 'Network error: unable to reach API');
+        (data?.message || data?.error) ??
+        (status ? `Error ${status}` : (err?.message || 'Network error: unable to reach API'));
       setError(msg);
     }
   };
