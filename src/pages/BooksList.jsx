@@ -142,7 +142,7 @@ function BooksList() {
   useEffect(() => {
     (async () => {
       const data = await getAdminCategories();
-      setCategories(Array.isArray(data) ? data : (data?.items ?? []));
+      setCategories(Array.isArray(data) ? data : (data?.categories ?? (data?.items ?? [])));
     })();
   }, []);
 
@@ -366,18 +366,24 @@ function BooksList() {
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <td className="px-6 py-4">
-                          {b.thumbnail ? (
-                            <img
-                              src={thumbURLs[b.thumbnail] || ''}
-                              alt={b.title}
-                              className="w-16 h-20 object-cover rounded-xl shadow-md transition-transform group-hover:scale-105"
-                              onError={(e) => { 
-                                e.currentTarget.style.display = 'none'; 
-                                e.currentTarget.nextElementSibling.style.display = 'flex';
-                              }}
-                            />
-                          ) : null}
-                          <div className={`w-16 h-20 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 ${b.thumbnail ? 'hidden' : 'flex'} items-center justify-center`}>
+                          {(() => {
+                            const url = b.thumbnail ? thumbURLs[b.thumbnail] : null;
+                            if (url) {
+                              return (
+                                <img
+                                  src={url}
+                                  alt={b.title}
+                                  className="w-16 h-20 object-cover rounded-xl shadow-md transition-transform group-hover:scale-105"
+                                  onError={(e) => { 
+                                    e.currentTarget.style.display = 'none'; 
+                                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                              );
+                            }
+                            return null;
+                          })()}
+                          <div className={`w-16 h-20 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 ${b.thumbnail && thumbURLs[b.thumbnail] ? 'hidden' : 'flex'} items-center justify-center`}>
                             <Image className="w-8 h-8 text-gray-400" />
                           </div>
                         </td>
@@ -386,7 +392,7 @@ function BooksList() {
                           <div className="font-semibold text-gray-900 group-hover:text-secondary transition-colors">
                             {b.title}
                           </div>
-                          {b.is_featured && (
+                          {Boolean(Number(b.is_featured)) && (
                             <span className="mt-2 inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-sm">
                               Featured
                             </span>

@@ -79,6 +79,8 @@ function DashboardOverview() {
   const { data: activity, isLoading: activityLoading } = useActivityQuery();
   const { data: statsSummary, isLoading: statsLoading } = useStatsQuery();
   
+  console.log(booksMetrics);
+  
   const handlePeriodChange = (stat, period) => {
     setPeriods(prev => ({ ...prev, [stat]: period }));
   };

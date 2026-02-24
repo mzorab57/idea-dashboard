@@ -31,6 +31,8 @@ function BooksCreate() {
   const [specs, setSpecs] = useState([]);
   const [specName, setSpecName] = useState('');
   const [specValue, setSpecValue] = useState('');
+  const [specGroup, setSpecGroup] = useState('');
+  const [specVisible, setSpecVisible] = useState(true);
   const [fileKey, setFileKey] = useState('');
   const [thumbKey, setThumbKey] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -39,7 +41,7 @@ function BooksCreate() {
   useEffect(() => {
     (async () => {
       const data = await getAdminCategories();
-      setCategories(Array.isArray(data) ? data : (data?.items ?? []));
+      setCategories(Array.isArray(data) ? data : (data?.categories ?? (data?.items ?? [])));
       const auths = await getAdminAuthors({ page: 1, limit: 100 });
       setAuthors(Array.isArray(auths) ? auths : (auths?.items ?? []));
     })();
@@ -85,7 +87,7 @@ function BooksCreate() {
       meta_title: values.meta_title || null,
       meta_description: values.meta_description || null,
       authors: selectedAuthors.map((a) => ({ id: a.id, role: a.role })),
-      specifications: specs.map((s) => ({ name: s.name, value: s.value })),
+      specifications: specs.map((s) => ({ name: s.name, value: s.value, group: s.group || null, is_visible: s.is_visible ? 1 : 0 })),
     };
     await createBook(payload);
     navigate('/dashboard/books', { replace: true });
@@ -106,9 +108,11 @@ function BooksCreate() {
   };
   const addSpec = () => {
     if (!specName || !specValue) return;
-    setSpecs([...specs, { name: specName, value: specValue }]);
+    setSpecs([...specs, { name: specName, value: specValue, group: specGroup, is_visible: specVisible ? 1 : 0 }]);
     setSpecName('');
     setSpecValue('');
+    setSpecGroup('');
+    setSpecVisible(true);
   };
   const removeSpec = (idx) => {
     setSpecs(specs.filter((_, i) => i !== idx));
@@ -200,9 +204,14 @@ function BooksCreate() {
       </div>
       <div className="space-y-2">
         <div className="font-semibold">تایبەتمەندییەکان</div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
           <input className="border rounded px-3 py-2" placeholder="ناو" value={specName} onChange={(e) => setSpecName(e.target.value)} />
           <input className="border rounded px-3 py-2" placeholder="بەها" value={specValue} onChange={(e) => setSpecValue(e.target.value)} />
+          <input className="border rounded px-3 py-2" placeholder="گروپ" value={specGroup} onChange={(e) => setSpecGroup(e.target.value)} />
+          <label className="flex items-center gap-2 px-3 py-2 border rounded">
+            <input type="checkbox" checked={specVisible} onChange={(e) => setSpecVisible(e.target.checked)} />
+            <span className="text-sm">دەرکەوتوو</span>
+          </label>
           <button type="button" className="px-3 py-2 border rounded" onClick={addSpec}>زیادکردن</button>
         </div>
         {specs.length > 0 && (
@@ -211,7 +220,9 @@ function BooksCreate() {
               <thead>
                 <tr className="bg-gray-50">
                   <th className="text-left px-3 py-2">ناو</th>
+                  <th className="text-left px-3 py-2">گروپ</th>
                   <th className="text-left px-3 py-2">بەها</th>
+                  <th className="text-left px-3 py-2">دەرکەوتوو</th>
                   <th className="text-left px-3 py-2">کردار</th>
                 </tr>
               </thead>
@@ -219,7 +230,30 @@ function BooksCreate() {
                 {specs.map((s, idx) => (
                   <tr key={idx} className="border-t">
                     <td className="px-3 py-2">{s.name}</td>
+                    <td className="px-3 py-2">
+                      <input
+                        className="border rounded px-2 py-1 w-full"
+                        value={s.group || ''}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setSpecs(specs.map((x, i) => i === idx ? { ...x, group: v } : x));
+                        }}
+                      />
+                    </td>
                     <td className="px-3 py-2">{s.value}</td>
+                    <td className="px-3 py-2">
+                      <label className="inline-flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={!!s.is_visible}
+                          onChange={(e) => {
+                            const v = e.target.checked ? 1 : 0;
+                            setSpecs(specs.map((x, i) => i === idx ? { ...x, is_visible: v } : x));
+                          }}
+                        />
+                        <span className="text-xs">{s.is_visible ? 'Visible' : 'Hidden'}</span>
+                      </label>
+                    </td>
                     <td className="px-3 py-2">
                       <button type="button" className="px-2 py-1 border rounded text-red-600" onClick={() => removeSpec(idx)}>سڕینەوە</button>
                     </td>

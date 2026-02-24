@@ -9,8 +9,8 @@ export const getDashboardActivity = async () => {
   const res = await api.get('/api/admin/stats/activity');
   return res.data;
 };
-export const getDashboardMetrics = async (period = '1d') => {
-  const res = await api.get('/api/admin/stats/metrics', { params: { period } });
+export const getDashboardMetrics = async (type = 'downloads', period = '1d') => {
+  const res = await api.get('/api/admin/stats/metrics', { params: { period, type } });
   return res.data;
 };
 

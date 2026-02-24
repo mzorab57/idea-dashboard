@@ -23,6 +23,7 @@ function LoginPage() {
 
   const onSubmit = async (values) => {
     try {
+      console.log('Sending login request with:', values);
       const res = await api.post('/api/admin/login', values);
       login({ token: res.data.token, user: { name: res.data.name, role: res.data.role } });
       navigate('/dashboard', { replace: true });

@@ -37,6 +37,8 @@ function BooksEdit() {
   const [specs, setSpecs] = useState([]);
   const [specName, setSpecName] = useState('');
   const [specValue, setSpecValue] = useState('');
+  const [specGroup, setSpecGroup] = useState('');
+  const [specVisible, setSpecVisible] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -55,13 +57,18 @@ function BooksEdit() {
       setFileKey(data.file_key || '');
       setThumbKey(data.thumbnail || '');
       const cats = await getAdminCategories();
-      setCategories(Array.isArray(cats) ? cats : (cats?.items ?? []));
+      setCategories(Array.isArray(cats) ? cats : (cats?.categories ?? (cats?.items ?? [])));
       const auths = await getAdminAuthors({ page: 1, limit: 100 });
       setAuthors(Array.isArray(auths) ? auths : (auths?.items ?? []));
       const dataAuthors = Array.isArray(data.authors) ? data.authors : [];
       setSelectedAuthors(dataAuthors.map((a) => ({ id: a.id, name: a.name, role: a.role || 'author' })));
       const dataSpecs = Array.isArray(data.specifications) ? data.specifications : [];
-      setSpecs(dataSpecs.map((s) => ({ name: s.spec_name ?? s.name ?? '', value: s.spec_value ?? s.value ?? '' })));
+      setSpecs(dataSpecs.map((s) => ({
+        name: s.spec_name ?? s.name ?? '',
+        value: s.spec_value ?? s.value ?? '',
+        group: s.group ?? '',
+        is_visible: (s.is_visible ?? 1) ? 1 : 0,
+      })));
     })();
   }, [id, reset]);
   const categoryIdValue = watch('category_id');
@@ -105,7 +112,12 @@ function BooksEdit() {
       meta_title: values.meta_title || null,
       meta_description: values.meta_description || null,
       authors: selectedAuthors.map((a) => ({ id: a.id, role: a.role })),
-      specifications: specs.map((s) => ({ name: s.name, value: s.value })),
+      specifications: specs.map((s) => ({
+        name: s.name,
+        value: s.value,
+        group: s.group || null,
+        is_visible: s.is_visible ? 1 : 0,
+      })),
     };
     await updateBook(id, payload);
     navigate('/dashboard/books', { replace: true });
@@ -225,15 +237,28 @@ function BooksEdit() {
         </div>
         <div className="space-y-2">
           <div className="font-semibold">Specifications</div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
             <input className="border rounded px-3 py-2" placeholder="Name" value={specName} onChange={(e) => setSpecName(e.target.value)} />
             <input className="border rounded px-3 py-2" placeholder="Value" value={specValue} onChange={(e) => setSpecValue(e.target.value)} />
-            <button type="button" className="px-3 py-2 border rounded" onClick={() => {
-              if (!specName || !specValue) return;
-              setSpecs([...specs, { name: specName, value: specValue }]);
-              setSpecName('');
-              setSpecValue('');
-            }}>Add</button>
+            <input className="border rounded px-3 py-2" placeholder="Group" value={specGroup} onChange={(e) => setSpecGroup(e.target.value)} />
+            <label className="flex items-center gap-2 px-3 py-2 border rounded">
+              <input type="checkbox" checked={specVisible} onChange={(e) => setSpecVisible(e.target.checked)} />
+              <span className="text-sm">Visible</span>
+            </label>
+            <button
+              type="button"
+              className="px-3 py-2 border rounded"
+              onClick={() => {
+                if (!specName || !specValue) return;
+                setSpecs([...specs, { name: specName, value: specValue, group: specGroup, is_visible: specVisible ? 1 : 0 }]);
+                setSpecName('');
+                setSpecValue('');
+                setSpecGroup('');
+                setSpecVisible(true);
+              }}
+            >
+              Add
+            </button>
           </div>
           {specs.length > 0 && (
             <div className="rounded border bg-white overflow-x-auto">
@@ -241,7 +266,9 @@ function BooksEdit() {
                 <thead>
                   <tr className="bg-gray-50">
                     <th className="text-left px-3 py-2">Name</th>
+                    <th className="text-left px-3 py-2">Group</th>
                     <th className="text-left px-3 py-2">Value</th>
+                    <th className="text-left px-3 py-2">Visible</th>
                     <th className="text-left px-3 py-2">Actions</th>
                   </tr>
                 </thead>
@@ -249,7 +276,39 @@ function BooksEdit() {
                   {specs.map((s, idx) => (
                     <tr key={idx} className="border-t">
                       <td className="px-3 py-2">{s.name}</td>
-                      <td className="px-3 py-2">{s.value}</td>
+                      <td className="px-3 py-2">
+                        <input
+                          className="border rounded px-2 py-1 w-full"
+                          value={s.group || ''}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setSpecs(specs.map((x, i) => i === idx ? { ...x, group: v } : x));
+                          }}
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          className="border rounded px-2 py-1 w-full"
+                          value={s.value}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setSpecs(specs.map((x, i) => i === idx ? { ...x, value: v } : x));
+                          }}
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <label className="inline-flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={!!s.is_visible}
+                            onChange={(e) => {
+                              const v = e.target.checked ? 1 : 0;
+                              setSpecs(specs.map((x, i) => i === idx ? { ...x, is_visible: v } : x));
+                            }}
+                          />
+                          <span className="text-xs">{s.is_visible ? 'Visible' : 'Hidden'}</span>
+                        </label>
+                      </td>
                       <td className="px-3 py-2">
                         <button type="button" className="px-2 py-1 border rounded text-red-600" onClick={() => {
                           setSpecs(specs.filter((_, i) => i !== idx));
