@@ -109,7 +109,7 @@ export default function CategoryModal({ open, mode = 'create', initial, onClose,
   if (!open) return null;
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div style={{marginTop: '0px'}} className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fadeIn" 
@@ -117,7 +117,7 @@ export default function CategoryModal({ open, mode = 'create', initial, onClose,
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl animate-slideUp overflow-hidden">
+      <div className="relative w-full h-[80vh] rounded-2xl md:h-auto md:max-w-lg bg-white md:rounded-2xl shadow-2xl animate-slideUp overflow-hidden">
         {/* Header */}
         <div className="relative px-6 py-5 bg-gradient-to-r from-primary to-secondary">
           <div className="flex items-center gap-3">

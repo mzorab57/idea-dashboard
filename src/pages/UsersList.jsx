@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { deleteUser } from '../services/admin';
 import UsersModal from '../components/shared/UsersModal';
+import PermissionsModal from '../components/shared/PermissionsModal';
 import { toast } from 'react-toastify';
 
 // Icons
@@ -132,6 +133,8 @@ function UsersList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ open: false, item: null });
+  const [permOpen, setPermOpen] = useState(false);
+  const [permUser, setPermUser] = useState(null);
 
   const items = useMemo(() => {
     if (!Array.isArray(data)) return [];
@@ -199,8 +202,8 @@ function UsersList() {
             <EmptyState onAdd={() => { setEditItem(null); setModalOpen(true); }} q={q} />
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto hidden md:block">
+                <table className="w-full min-w-[720px]">
                   <thead>
                     <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-100">
                       <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -268,6 +271,18 @@ function UsersList() {
                             >
                               <EditIcon />
                             </button>
+                            {u.role === 'employee' && (
+                              <button
+                                className="p-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-700 hover:shadow-lg hover:shadow-emerald-500/20 transform hover:scale-105 transition-all duration-200"
+                                onClick={() => { setPermUser(u); setPermOpen(true); }}
+                                title="Permissions"
+                              >
+                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 12a5 5 0 100-10 5 5 0 000 10z" />
+                                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M2 22a10 10 0 1120 0H2z" />
+                                </svg>
+                              </button>
+                            )}
                             <button 
                               className="p-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600 hover:shadow-lg hover:shadow-red-500/20 transform hover:scale-105 transition-all duration-200" 
                               onClick={() => setDeleteModal({ open: true, item: u })}
@@ -281,6 +296,48 @@ function UsersList() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+              <div className="md:hidden divide-y divide-gray-100">
+                {items.map((u) => (
+                  <div key={u.id} className="p-4 flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">
+                      {u.full_name?.charAt(0)?.toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">{u.full_name}</div>
+                      <div className="text-sm text-gray-600">{u.email}</div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] uppercase ${
+                          u.role === 'admin' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'
+                        }`}>{u.role}</span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] ${
+                          u.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-600'
+                        }`}>{u.is_active ? 'Active' : 'Inactive'}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button 
+                        className="p-2 rounded-lg border"
+                        onClick={() => { setEditItem(u); setModalOpen(true); }}
+                        aria-label="Edit"
+                      >
+                        <EditIcon />
+                      </button>
+                      {u.role === 'employee' && (
+                        <button
+                          className="p-2 rounded-lg border"
+                          onClick={() => { setPermUser(u); setPermOpen(true); }}
+                          aria-label="Permissions"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M12 12a5 5 0 100-10 5 5 0 000 10z" />
+                            <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M2 22a10 10 0 1120 0H2z" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </>
           )}
@@ -302,6 +359,12 @@ function UsersList() {
           onClose={() => setDeleteModal({ open: false, item: null })}
           onConfirm={onDelete}
           itemName={deleteModal.item?.full_name}
+        />
+        <PermissionsModal
+          open={permOpen}
+          user={permUser}
+          onClose={() => { setPermOpen(false); setPermUser(null); }}
+          onSuccess={() => {}}
         />
 
         {/* Animations */}

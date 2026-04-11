@@ -75,7 +75,7 @@ function DeleteConfirmModal({ open, onClose, onConfirm, itemName, itemImage }) {
   if (!open) return null;
   
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 ">
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fadeIn" 
         onClick={onClose}
@@ -120,7 +120,7 @@ function DeleteConfirmModal({ open, onClose, onConfirm, itemName, itemImage }) {
 // Loading Skeleton
 function TableSkeleton() {
   return (
-    <div className="animate-pulse">
+    <div className="animate-pulse overflow-x-auto">
       {[...Array(5)].map((_, i) => (
         <div key={i} className="flex items-center gap-4 p-4 border-b border-gray-100">
           <div className="w-14 h-14 bg-gray-200 rounded-full" />
@@ -278,7 +278,7 @@ function AuthorsList() {
   }, [items]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-p-50/30 p-6">
+    <div className="min-h-screen  bg-gradient-to-br from-slate-50 via-white to-p-50/30 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -338,16 +338,18 @@ function AuthorsList() {
           </div>
         </div>
 
-        {/* Table Card */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden">
+         {/* Table Card */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-100 shadow-xl shadow-gray-200/50">
           {isLoading ? (
             <TableSkeleton />
           ) : items.length === 0 ? (
             <EmptyState onAdd={() => { setEditItem(null); setModalOpen(true); }} />
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              {/* === شوێنی گۆڕانکارییەکە لێرەیە === */}
+              {/* زیادکردنی 'w-full' و 'min-w-0' بۆ چارەسەرکردنی کێشەی سکرۆڵ */}
+              <div className="overflow-x-auto w-full min-w-0">
+                <table className="w-full min-w-[900px]">
                   <thead>
                     <tr className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-100">
                       <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">

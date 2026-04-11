@@ -11,6 +11,7 @@ const schema = z.object({
   category_id: z.string().optional(),
   subcategory_id: z.string().optional(),
   short_description: z.string().optional(),
+  youtube_url: z.string().optional(),
   meta_title: z.string().optional(),
   meta_description: z.string().optional(),
   is_active: z.boolean().optional(),
@@ -78,6 +79,7 @@ function BooksCreate() {
       slug: values.slug,
       short_description: values.short_description || null,
       long_description: null,
+      youtube_url: values.youtube_url || null,
       category_id: values.category_id ? Number(values.category_id) : null,
       subcategory_id: values.subcategory_id ? Number(values.subcategory_id) : null,
       file_key: fileKey || null,
@@ -151,6 +153,10 @@ function BooksCreate() {
         <div>
           <label className="text-sm">کورتە</label>
           <input className="w-full border rounded px-3 py-2" {...register('short_description')} />
+        </div>
+        <div>
+          <label className="text-sm">YouTube URL</label>
+          <input className="w-full border rounded px-3 py-2" placeholder="https://www.youtube.com/watch?v=..." {...register('youtube_url')} />
         </div>
         <div>
           <label className="text-sm">Meta Title</label>

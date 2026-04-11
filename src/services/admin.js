@@ -152,6 +152,16 @@ export const deleteUser = async (id) => {
   return res.data;
 };
 
+// Employee Permissions
+export const getEmployeePermissions = async (userId) => {
+  const res = await api.get(`/api/admin/permissions/${userId}`);
+  return res.data;
+};
+export const updateEmployeePermissions = async (userId, payload) => {
+  const res = await api.put(`/api/admin/permissions/${userId}`, payload);
+  return res.data;
+};
+
 export const getAdminSettings = async () => {
   const res = await api.get('/api/admin/settings');
   return res.data;

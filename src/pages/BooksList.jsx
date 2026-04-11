@@ -422,10 +422,10 @@ function BooksList() {
                         <td className="px-6 py-4">
                           <div className="flex flex-col gap-1">
                             <div className="text-sm font-medium text-gray-700">
-                              <Eye className="w-4 h-4 inline-block mr-1" /> {b.view_count ?? 0} views
+                              <Eye className="w-4 h-4 inline-block mr-1" /> {b.view_count ?? 0} 
                             </div>
                             <div className="text-sm font-medium text-gray-700">
-                              <Download className="w-4 h-4 inline-block mr-1" /> {b.download_count ?? 0} downloads
+                              <Download className="w-4 h-4 inline-block mr-1" /> {b.download_count ?? 0} 
                             </div>
                           </div>
                         </td>

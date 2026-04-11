@@ -1,30 +1,31 @@
 
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './api/queryClient';
 import ProtectedRoute from './components/shared/ProtectedRoute';
 import DashboardLayout from './layouts/DashboardLayout';
 import AuthLayout from './layouts/AuthLayout';
 import { useAuthStore } from './store/authStore';
-import LoginPage from './pages/LoginPage';
-import DashboardOverview from './pages/DashboardOverview';
-import BooksList from './pages/BooksList';
-import BooksCreate from './pages/BooksCreate';
-import BooksEdit from './pages/BooksEdit';
-import AuthorsList from './pages/AuthorsList';
-import AuthorsCreate from './pages/AuthorsCreate';
-import AuthorsEdit from './pages/AuthorsEdit';
-import CategoriesList from './pages/CategoriesList';
-import CategoriesCreate from './pages/CategoriesCreate';
-import CategoriesEdit from './pages/CategoriesEdit';
-import SubcategoriesList from './pages/SubcategoriesList';
-import SubcategoriesCreate from './pages/SubcategoriesCreate';
-import SubcategoriesEdit from './pages/SubcategoriesEdit';
-import UsersList from './pages/UsersList';
-import UsersCreate from './pages/UsersCreate';
-import UsersEdit from './pages/UsersEdit';
-import SettingsPage from './pages/SettingsPage';
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const DashboardOverview = lazy(() => import('./pages/DashboardOverview'));
+const BooksList = lazy(() => import('./pages/BooksList'));
+const BooksCreate = lazy(() => import('./pages/BooksCreate'));
+const BooksEdit = lazy(() => import('./pages/BooksEdit'));
+const AuthorsList = lazy(() => import('./pages/AuthorsList'));
+const AuthorsCreate = lazy(() => import('./pages/AuthorsCreate'));
+const AuthorsEdit = lazy(() => import('./pages/AuthorsEdit'));
+const CategoriesList = lazy(() => import('./pages/CategoriesList'));
+const CategoriesCreate = lazy(() => import('./pages/CategoriesCreate'));
+const CategoriesEdit = lazy(() => import('./pages/CategoriesEdit'));
+const SubcategoriesList = lazy(() => import('./pages/SubcategoriesList'));
+const SubcategoriesCreate = lazy(() => import('./pages/SubcategoriesCreate'));
+const SubcategoriesEdit = lazy(() => import('./pages/SubcategoriesEdit'));
+const UsersList = lazy(() => import('./pages/UsersList'));
+const UsersCreate = lazy(() => import('./pages/UsersCreate'));
+const UsersEdit = lazy(() => import('./pages/UsersEdit'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -37,7 +38,8 @@ function App() {
   return (
     <QueryClientProvider  client={queryClient}>
       <BrowserRouter>
-        <Routes>
+        <Suspense fallback={<div className="h-[100vh] flex items-center justify-center">Loading…</div>}>
+          <Routes>
           <Route path="/" element={<RootIndex />} />
           <Route  path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
           <Route
@@ -173,7 +175,7 @@ function App() {
           <Route
             path="/dashboard/users"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['admin']}>
                 <DashboardLayout>
                   <UsersList />
                 </DashboardLayout>
@@ -183,7 +185,7 @@ function App() {
           <Route
             path="/dashboard/users/new"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['admin']}>
                 <DashboardLayout>
                   <UsersCreate />
                 </DashboardLayout>
@@ -193,7 +195,7 @@ function App() {
           <Route
             path="/dashboard/users/:id/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['admin']}>
                 <DashboardLayout>
                   <UsersEdit />
                 </DashboardLayout>
@@ -211,7 +213,8 @@ function App() {
             }
           />
           <Route path="*" element={<RootIndex />} />
-        </Routes>
+          </Routes>
+        </Suspense>
         <ToastContainer position="top-right" autoClose={2500} hideProgressBar={false} closeOnClick pauseOnHover />
       </BrowserRouter>
     </QueryClientProvider>
