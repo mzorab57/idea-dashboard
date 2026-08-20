@@ -3,11 +3,12 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createUser } from '../services/admin';
 import { useNavigate } from 'react-router-dom';
+import { isStrongPassword, PASSWORD_POLICY_MESSAGE } from '../utils/passwordPolicy';
 
 const schema = z.object({
-  full_name: z.string().min(1),
-  email: z.string().email(),
-  password: z.string().min(6),
+  full_name: z.string().trim().min(1),
+  email: z.string().trim().toLowerCase().email(),
+  password: z.string().refine(isStrongPassword, PASSWORD_POLICY_MESSAGE),
   is_active: z.boolean().optional(),
 });
 
@@ -20,8 +21,8 @@ function UsersCreate() {
 
   const onSubmit = async (values) => {
     const payload = {
-      full_name: values.full_name,
-      email: values.email,
+      full_name: values.full_name.trim(),
+      email: values.email.trim().toLowerCase(),
       password: values.password,
       is_active: values.is_active ? 1 : 0,
     };
@@ -39,13 +40,14 @@ function UsersCreate() {
         </div>
         <div>
           <label className="text-sm">ئیمەیل</label>
-          <input className="w-full border rounded px-3 py-2" type="email" {...register('email')} />
+          <input className="w-full border rounded px-3 py-2" type="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} {...register('email')} />
           {formState.errors.email && <p className="text-red-600 text-sm">ئیمەیل دروست نیە</p>}
         </div>
         <div>
           <label className="text-sm">وشەی نهێنی</label>
           <input className="w-full border rounded px-3 py-2" type="password" {...register('password')} />
-          {formState.errors.password && <p className="text-red-600 text-sm">کەمترە لە 6 پیت</p>}
+          <p className="text-xs text-gray-500 mt-1">لانیکەم 6 پیت، پیتی گەورە و بچووک، ژمارە، symbol و بێ space.</p>
+          {formState.errors.password && <p className="text-red-600 text-sm">{formState.errors.password.message}</p>}
         </div>
       </div>
       <div className="flex gap-6 items-center">

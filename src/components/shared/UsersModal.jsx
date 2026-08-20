@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createUser, updateUser } from '../../services/admin';
 import { toast } from 'react-toastify';
+import { isStrongPassword, PASSWORD_POLICY_MESSAGE } from '../../utils/passwordPolicy';
 
 const CloseIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,15 +30,18 @@ const CheckIcon = () => (
   </svg>
 );
 
-const schema = z.object({
-  full_name: z.string().min(1),
-  email: z.string().email(),
-  password: z.string().optional(),
-  role: z.string().optional(),
-  is_active: z.boolean().optional(),
-});
-
 export default function UsersModal({ open, mode = 'create', initial, onClose, onSuccess }) {
+  const schema = z.object({
+    full_name: z.string().trim().min(1, 'Required'),
+    email: z.string().trim().toLowerCase().email('Invalid email'),
+    password:
+      mode === 'create'
+        ? z.string().refine(isStrongPassword, PASSWORD_POLICY_MESSAGE)
+        : z.string().optional().refine((value) => !value || isStrongPassword(value), PASSWORD_POLICY_MESSAGE),
+    role: z.string().optional(),
+    is_active: z.boolean().optional(),
+  });
+
   const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { full_name: '', email: '', password: '', role: 'employee', is_active: true },
@@ -60,13 +64,9 @@ export default function UsersModal({ open, mode = 'create', initial, onClose, on
   }, [open, mode, initial, reset]);
 
   const onSubmit = async (values) => {
-    if (mode === 'create' && (!values.password || values.password.length < 6)) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
     const payload = {
-      full_name: values.full_name,
-      email: values.email,
+      full_name: values.full_name.trim(),
+      email: values.email.trim().toLowerCase(),
       password: values.password || '',
       role: values.role || 'employee',
       is_active: values.is_active ? 1 : 0,
@@ -82,7 +82,7 @@ export default function UsersModal({ open, mode = 'create', initial, onClose, on
       onClose?.();
       onSuccess?.();
     } catch (err) {
-      toast.error(err?.message || 'Action failed');
+      toast.error(err?.response?.data?.error || err?.message || 'Action failed');
     }
   };
 
@@ -138,6 +138,10 @@ export default function UsersModal({ open, mode = 'create', initial, onClose, on
                 type="email"
                 className={`w-full px-4 py-3 bg-gray-50 border-2 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 ${errors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-transparent'}`}
                 placeholder="name@example.com"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 {...register('email')}
               />
               {errors.email && (
@@ -151,10 +155,17 @@ export default function UsersModal({ open, mode = 'create', initial, onClose, on
               </label>
               <input
                 type="password"
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10"
-                placeholder={mode === 'edit' ? 'Leave empty to keep current password' : 'At least 6 characters'}
+                className={`w-full px-4 py-3 bg-gray-50 border-2 rounded-xl text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 ${errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' : 'border-transparent'}`}
+                placeholder={mode === 'edit' ? 'Leave empty to keep current password' : 'Strong password required'}
+                autoComplete={mode === 'edit' ? 'new-password' : 'new-password'}
                 {...register('password')}
               />
+              <p className="text-xs text-gray-500">
+                At least 6 characters, with uppercase, lowercase, number, symbol, and no spaces.
+              </p>
+              {errors.password && (
+                <p className="text-red-500 text-sm">{errors.password.message}</p>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

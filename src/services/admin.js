@@ -167,6 +167,26 @@ export const getAdminSettings = async () => {
   return res.data;
 };
 
+export const getAdminHeroBanners = async () => {
+  const res = await api.get('/api/admin/banners');
+  return res.data;
+};
+
+export const createHeroBanner = async (payload) => {
+  const res = await api.post('/api/admin/banners', payload);
+  return res.data;
+};
+
+export const updateHeroBanner = async (id, payload) => {
+  const res = await api.put(`/api/admin/banners/${id}`, payload);
+  return res.data;
+};
+
+export const deleteHeroBanner = async (id) => {
+  const res = await api.delete(`/api/admin/banners/${id}`);
+  return res.data;
+};
+
 export const updateAdminSettings = async (payload) => {
   const res = await api.put('/api/admin/settings', payload);
   return res.data;

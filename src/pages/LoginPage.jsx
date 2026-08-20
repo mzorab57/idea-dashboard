@@ -23,8 +23,11 @@ function LoginPage() {
 
   const onSubmit = async (values) => {
     try {
-      console.log('Sending login request with:', values);
-      const res = await api.post('/api/admin/login', values);
+      const payload = {
+        email: values.email.trim().toLowerCase(),
+        password: values.password,
+      };
+      const res = await api.post('/api/admin/login', payload);
       login({ token: res.data.token, user: { name: res.data.name, role: res.data.role } });
       navigate('/dashboard', { replace: true });
     } catch (err) {
@@ -72,6 +75,11 @@ function LoginPage() {
                   }`}
                   placeholder="admin@example.com"
                   type="email"
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  inputMode="email"
                   {...register('email')}
                 />
               </div>
@@ -101,6 +109,7 @@ function LoginPage() {
                   }`}
                   placeholder="••••••••"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   {...register('password')}
                 />
                 <button

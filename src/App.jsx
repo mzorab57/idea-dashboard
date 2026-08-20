@@ -1,7 +1,7 @@
 
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './api/queryClient';
 import ProtectedRoute from './components/shared/ProtectedRoute';
@@ -31,10 +31,18 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function RootIndex() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+  if (!isHydrated) return <div className="h-[100vh] flex items-center justify-center">Loading…</div>;
   return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />;
 }
 
 function App() {
+  const hydrate = useAuthStore((s) => s.hydrate);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
   return (
     <QueryClientProvider  client={queryClient}>
       <BrowserRouter>
@@ -205,7 +213,7 @@ function App() {
           <Route
             path="/dashboard/settings"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={['admin']}>
                 <DashboardLayout>
                   <SettingsPage />
                 </DashboardLayout>
